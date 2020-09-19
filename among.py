@@ -9,13 +9,8 @@ from discord.ext import commands
 from consts import *
 from datetime import datetime
 
-os.chdir(os.path.dirname(__file__))
 client = commands.Bot(command_prefix="au!")
 client.remove_command("help")
-
-with open('token.txt' ,'r') as f:
-    TOKEN = f.readline()
-
 
 def is_admin():
     def check_admin(ctx):
@@ -36,10 +31,17 @@ async def on_ready():
 
 
 @client.event
+async def on_member_join(member):
+    role = discord.utils.get(member.guild.roles, name="They are among us")
+    await member.add_roles(role)
+
+
+@client.event
 async def on_raw_reaction_add(event):
 
     emoji = event.emoji.name
     channel = client.get_channel(event.channel_id)
+    logs = client.get_channel(755516613209620540)
     message = await channel.fetch_message(event.message_id)
     reaction = get(message.reactions, emoji=event.emoji)
     user = client.get_user(event.user_id)
@@ -50,7 +52,7 @@ async def on_raw_reaction_add(event):
         pass
     else:
         check = False
-        if (event.channel_id == 751945996828672032) and (emoji in d):
+        if (channel.name == "get-roles") and (emoji in d):
             if emoji in Le:
                 check =  any(r.name in Lr for r in member.roles)
 
@@ -59,11 +61,13 @@ async def on_raw_reaction_add(event):
             else:
                 role = discord.utils.get(guild.roles, name=d[emoji])
                 await member.add_roles(role)
+                await logs.send("⬆️ The **{}** role has been added to **{}**".format(role,user))
                 if emoji in Le:
                     nbr = reaction.count
-                    if nbr < 5:
+                    if nbr < 6:
                         role = discord.utils.get(guild.roles, name=dn[nbr])
                         await member.add_roles(role)
+                        await logs.send("⬆️ The **{}** role has been added to **{}**".format(role,user))
 
 
 
@@ -72,6 +76,8 @@ async def on_raw_reaction_add(event):
 async def on_raw_reaction_remove(event):
 
     emoji = event.emoji.name
+    channel = client.get_channel(event.channel_id)
+    logs = client.get_channel(755516613209620540)
     user = client.get_user(event.user_id)
     guild = client.get_guild(event.guild_id)
     member = guild.get_member(event.user_id)
@@ -80,22 +86,25 @@ async def on_raw_reaction_remove(event):
         pass
     else:
 
-        if event.channel_id == 751945996828672032:
+        if (channel.name == "get-roles"):
             
             if emoji in d:
                 for r in member.roles:
-                    if r.name in list(dn.values()) and (d[emoji] in [ro.name for ro in member.roles]):
-                        role = discord.utils.get(guild.roles, name=r.name)
-                        try:
-                            await member.remove_roles(role)
-                        except:
-                            pass
-                        finally:
-                            break
+                    if emoji in Le:
+                        if r.name in list(dn.values()) and (d[emoji] in [ro.name for ro in member.roles]):
+                            role = discord.utils.get(guild.roles, name=r.name)
+                            try:
+                                await member.remove_roles(role)
+                                await logs.send("⬇️ The **{}** role has been removed from **{}**".format(role,user))
+                            except:
+                                pass
+                            finally:
+                                break
 
                 role = discord.utils.get(guild.roles, name=d[emoji])
                 try:
                     await member.remove_roles(role)
+                    await logs.send("⬇️ The **{}** role has been removed from **{}**".format(role,user))
                 except:
                     pass
 
@@ -103,8 +112,10 @@ async def on_raw_reaction_remove(event):
 @client.command()
 @is_admin()
 async def create(ctx):
+
+    channel = client.get_channel(ctx.channel.id)
     
-    if ctx.channel.id == 751945996828672032:
+    if (channel.name == "get-roles"):
 
         embed = discord.Embed(
             colour = discord.Color.from_rgb(54, 57, 63),
@@ -126,7 +137,7 @@ async def create(ctx):
             await panel.add_reaction(emoji)
 
     else:
-        await ctx.channel.send("❌ Wrong channel. You have to use this command in <#{}>".format(751945996828672032))
+        await ctx.channel.send("❌ Wrong channel. You have to use this command in a channel called **#get-roles**")
 
 
-client.run(TOKEN)
+client.run("NzUxOTE0ODc5NTUxNjY4MzI1.X1QBTQ.2SAAJV1yb7gP5fUA81NozcyjLqM")
