@@ -140,4 +140,4 @@ async def create(ctx):
         await ctx.channel.send("❌ Wrong channel. You have to use this command in a channel called **#get-roles**")
 
 
-client.run("NzUxOTE0ODc5NTUxNjY4MzI1.X1QBTQ.2SAAJV1yb7gP5fUA81NozcyjLqM")
+client.run(TOKEN)
